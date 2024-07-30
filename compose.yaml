@@ -1,0 +1,58 @@
+
+services:
+  client:
+    container_name: url-shortener-client-container
+    restart: always
+    build:
+      context: .\client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+    depends_on:
+      - server
+  server:
+    container_name: url-shortener-php-api-container
+    restart: always
+    build:
+      context: .\backend
+    ports:
+      - 9000:80
+    volumes:
+      - ./backend/vendor:/var/www/html/vendor
+      - ./backend/public:/var/www/html
+    environment:
+      - DB_HOST=mongodb://localhost:27017
+    depends_on:
+      db:
+        condition: service_healthy
+  inotify:
+    image: alpine:latest
+    volumes:
+      - ./backend/public:/var/www/html
+    entrypoint: sh -c "apk add inotify-tools && while inotifywait -r -e modify,create,delete,move /var/www/html; do docker-compose restart server; done"
+
+  db:
+    image: mongo:latest
+    restart: always
+    container_name: mongo
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+volumes:
+  db-data:
+secrets:
+  db-password:
+    file: db/password.txt
+networks:
+  app-network:
+    driver: bridge
+

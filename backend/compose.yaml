@@ -1,0 +1,40 @@
+
+services:
+  server:
+    build:
+      context: .
+    ports:
+      - 9000:80
+    volumes:
+      - ./src/Controller:/var/www/html/src/Controller
+      - ./vendor:/var/www/html/vendor
+    environment:
+      - DB_HOST=mongodb://localhost:27017
+    depends_on:
+      db:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./public
+          target: /var/www/html
+  db:
+    image: mongo:latest
+    restart: always
+    container_name: mongo
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+volumes:
+  db-data:
+secrets:
+  db-password:
+    file: db/password.txt
+

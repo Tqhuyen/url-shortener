@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  client:
+    container_name: url-shortener-client-container
+    restart: always
+    build: .
+    ports:
+      - "80:80"
+
