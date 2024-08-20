@@ -4,10 +4,10 @@ services:
     container_name: url-shortener-client-container
     restart: always
     build:
-      context: .\client
+      context: ./client
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "3030:80"
     networks:
       - app-network
     depends_on:
@@ -16,7 +16,8 @@ services:
     container_name: url-shortener-php-api-container
     restart: always
     build:
-      context: .\backend
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - 9000:80
     volumes:
@@ -27,12 +28,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-  inotify:
-    image: alpine:latest
-    volumes:
-      - ./backend/public:/var/www/html
-    entrypoint: sh -c "apk add inotify-tools && while inotifywait -r -e modify,create,delete,move /var/www/html; do docker-compose restart server; done"
-
   db:
     image: mongo:latest
     restart: always

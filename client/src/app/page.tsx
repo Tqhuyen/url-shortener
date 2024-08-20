@@ -20,7 +20,7 @@ export default function Home() {
     console.log(url);
     axios
       .post(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/shorten`, {
-        longUrl: url,
+        longURL: url,
       })
       .then(({ data: response }: AxiosResponse) => {
         console.log(response);

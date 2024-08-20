@@ -1,7 +1,7 @@
 FROM node:lts-alpine
 COPY . /client
 WORKDIR /client
-RUN yarn install --frozen-lockfile
+RUN yarn install
 ENV NODE_ENV=production
 RUN yarn build
 EXPOSE 80
